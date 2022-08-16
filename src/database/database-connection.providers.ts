@@ -1,5 +1,6 @@
 import { ConfigType } from '@nestjs/config';
 import { Connection, createConnection, Schema, model } from 'mongoose';
+import { isNumberObject } from 'util/types';
 import mongodbConfig from '../config/mongodb.config';
 import { DATABASE_CONNECTION } from './database.constants';
 
@@ -14,27 +15,32 @@ export const databaseConnectionProviders = [
         //useFindAndModify: false,
       });
 
-      conn.on('connected', () => {
-        console.log('Conectado');
-      });
-
       conn.on('error', console.error.bind(console, 'connection error:'));
 
       interface Iuser {
-        id: number;
+        name: string;
       }
-      const schema = new Schema<Iuser>({
-        id: { type: Number, required: true },
+      const schema = new Schema<Iuser>(
+        {
+          name: { type: String, required: true },
+        },
+        { collection: 'MyUsers' },
+      );
+
+      const MyUser = conn.model<Iuser>('MyUser', schema);
+
+      const user = new MyUser({
+        name: 'María',
       });
 
-      const prueba = model<Iuser>('users', schema);
-      async function pruebaa() {
-        console.log('first');
-        const ala = await prueba.exists({ id: 1 });
-        console.log(ala);
-      }
-
-      pruebaa();
+      user
+        .save()
+        .then(() => {
+          console.log('Creado');
+        })
+        .catch((error) => {
+          console.log(error);
+        });
 
       return conn;
     },
