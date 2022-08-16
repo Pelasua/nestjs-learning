@@ -1,5 +1,5 @@
 import { ConfigType } from '@nestjs/config';
-import { Connection, createConnection } from 'mongoose';
+import { Connection, createConnection, Schema, model } from 'mongoose';
 import mongodbConfig from '../config/mongodb.config';
 import { DATABASE_CONNECTION } from './database.constants';
 
@@ -14,9 +14,27 @@ export const databaseConnectionProviders = [
         //useFindAndModify: false,
       });
 
-      // conn.on('disconnect', () => {
-      //   console.log('Disconnecting to MongoDB');
-      // });
+      conn.on('connected', () => {
+        console.log('Conectado');
+      });
+
+      conn.on('error', console.error.bind(console, 'connection error:'));
+
+      interface Iuser {
+        id: number;
+      }
+      const schema = new Schema<Iuser>({
+        id: { type: Number, required: true },
+      });
+
+      const prueba = model<Iuser>('users', schema);
+      async function pruebaa() {
+        console.log('first');
+        const ala = await prueba.exists({ id: 1 });
+        console.log(ala);
+      }
+
+      pruebaa();
 
       return conn;
     },
